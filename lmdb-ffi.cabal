@@ -1,0 +1,80 @@
+name:                lmdb-ffi
+version:             0.9.19.0
+synopsis:            Haskell bindings for the ...
+-- description:
+homepage:            https://github.com/skeuchel/lmdb-ffi
+license:             BSD3
+license-file:        LICENSE
+author:              Steven Keuchel
+maintainer:          steven.keuchel@gmail.com
+copyright:           (c) 2017 by Steven Keuchel
+category:            Database
+build-type:          Simple
+cabal-version:       >=1.18
+
+extra-source-files:
+  cbits/CHANGES
+  cbits/COPYRIGHT
+  cbits/LICENSE
+  cbits/lmdb.h
+  cbits/mdb.c
+  cbits/midl.h
+  cbits/midl.c
+
+flag fixedmap
+  description: Enable support for fixed address databases
+  default:     False
+
+flag system
+  description: Use the lmdb library provided by the system
+  default:     True
+
+library
+  exposed-modules:
+    Database.LMDB.C
+
+  other-modules:
+
+  other-extensions:
+    GeneralizedNewtypeDeriving
+    PatternSynonyms
+
+  build-depends:
+    base         >=4.6  && <5
+
+  if flag(system)
+    pkgconfig-depends:
+      lmdb >=0.9.19 && <1
+    cpp-options: "-DLMDB_SYSTEM"
+  else
+    c-sources:
+      cbits/mdb.c
+      cbits/midl.c
+    include-dirs:
+      cbits
+
+  if flag(fixedmap)
+    cpp-options: "-DLMDB_FIXEDMAP"
+
+  build-tools:         hsc2hs
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  hs-source-dirs:      src
+
+test-suite lmdb-ffi-test
+
+  build-depends:
+    base,
+    lmdb-ffi,
+    random,
+    temporary
+
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  hs-source-dirs:      src test
+  main-is:             Tests.hs
+  type:                exitcode-stdio-1.0
+
+source-repository head
+  type:     git
+  location: https://github.com/skeuchel/lmdb-ffi
